@@ -1,4 +1,4 @@
-use_bpm 40
+use_bpm 45
 
 P = 0.125
 N = 0.25
@@ -15,7 +15,8 @@ moves = [
   [N,:f3],[P,:d5],
   [P,:d4],[N,:f6],
   [N,:c3],[B,:e7],
-  [B,:g5],[O-O],
+  [B,:g5],
+##| [O-O],
   [P,:e3],[P,:b6],
   [B,:b4],[P,:bb6],
   [P,:d5],[N,:d5],
@@ -26,7 +27,8 @@ moves = [
   [Q,:a3],[R,:c8],
   [B,:bb5],[P,:a6],
   [P,:c5],[P,:c5],
-  [O-O],[R,:a7],
+  ##| [O-O],
+[R,:a7],
   [B,:e2],[N,:d7],
   [N,:d4],[Q,:f8],
   [N,:e6],[P,:e6],
@@ -105,10 +107,12 @@ define :bassline do | moves|
   moves.each_with_index do |item,index|
     p, n = item
     if n
-      r = chord(n-24, :m7).mirror.shuffle
-      if index % 8 == 0
-	r.each do |n|
-	  midi n, vel_f: rrand(0.2, 0.4), port: "iac_driver_iac_bus_2"
+      n = transpose(n)
+      r = chord(n-29, :m7).shuffle
+      puts r
+      if index % 4 == 0
+	r.each do |b|
+	  midi b, vel_f: rrand(0.2, 0.4), port: "iac_driver_iac_bus_2"
 	  sleep 0.5
 	end
       end
@@ -121,21 +125,21 @@ in_thread(name: :bass) do
 end
 
 in_thread(name: :chords) do
-  chords(moves)
+chords(moves)
 end
 
 in_thread(name: :cymbals) do
-  wait 2
-  (moves.length*2.4).round.times do
-    with_swing 0.2, pulse:6 do
-      midi 51, port:"iac_driver_iac_bus_5" if !one_in 8
-      sleep 0.25
-    end
-  end
-  midi 51, port:"iac_driver_iac_bus_5"
+wait 2
+(moves.length*2.4).round.times do
+with_swing 0.2, pulse:6 do
+midi 51, port:"iac_driver_iac_bus_5" if !one_in 8
+sleep 0.25
+end
+end
+midi 51, port:"iac_driver_iac_bus_5"
 end
 
 in_thread(name: :melody) do
-  wait 6
-  melody(moves)
+wait 6
+melody(moves)
 end
