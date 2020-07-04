@@ -16,7 +16,7 @@ moves = [
   [P,:d4],[N,:f6],
   [N,:c3],[B,:e7],
   [B,:g5],
-##| [O-O],
+  ##| [O-O],
   [P,:e3],[P,:b6],
   [B,:b4],[P,:bb6],
   [P,:d5],[N,:d5],
@@ -28,7 +28,7 @@ moves = [
   [B,:bb5],[P,:a6],
   [P,:c5],[P,:c5],
   ##| [O-O],
-[R,:a7],
+  [R,:a7],
   [B,:e2],[N,:d7],
   [N,:d4],[Q,:f8],
   [N,:e6],[P,:e6],
@@ -71,7 +71,7 @@ define :melody do | moves|
     if index > 0
       x = transpose(moves[index-1][1])
       if n == x
-	n += [12,0,-12].choose
+        n += [12,0,-12].choose
       end
       if p == 0.125
         midi n+7, sustain: p, vel_f: ((0.8-(p))/2)+0.1, port: "iac_driver_iac_bus_3"
@@ -94,15 +94,15 @@ define :chords do | moves ,ratio = 0.9 |
       end
       sleep p/2
       (chord(n-12, "add9")).each.with_index do |n, index|
-	midi n, sustain: 3, vel_f: rrand(0.1, 0.3), port: "iac_driver_iac_bus_1"
+        midi n, sustain: 3, vel_f: rrand(0.1, 0.3), port: "iac_driver_iac_bus_1"
       end
     end
     count = count + p
     sleep p
   end
 end
-      
-      
+
+
 define :bassline do | moves|
   moves.each_with_index do |item,index|
     p, n = item
@@ -111,10 +111,10 @@ define :bassline do | moves|
       r = chord(n-29, :m7).shuffle
       puts r
       if index % 4 == 0
-	r.each do |b|
-	  midi b, vel_f: rrand(0.2, 0.4), port: "iac_driver_iac_bus_2"
-	  sleep 0.5
-	end
+        r.each do |b|
+          midi b, vel_f: rrand(0.2, 0.4), port: "iac_driver_iac_bus_2"
+          sleep 0.5
+        end
       end
     end
   end
@@ -125,21 +125,21 @@ in_thread(name: :bass) do
 end
 
 in_thread(name: :chords) do
-chords(moves)
+  chords(moves)
 end
 
 in_thread(name: :cymbals) do
-wait 2
-(moves.length*2.4).round.times do
-with_swing 0.2, pulse:6 do
-midi 51, port:"iac_driver_iac_bus_5" if !one_in 8
-sleep 0.25
-end
-end
-midi 51, port:"iac_driver_iac_bus_5"
+  wait 2
+  (moves.length*2.4).round.times do
+    with_swing 0.2, pulse:6 do
+      midi 51, port:"iac_driver_iac_bus_5" if !one_in 8
+      sleep 0.25
+    end
+  end
+  midi 51, port:"iac_driver_iac_bus_5"
 end
 
 in_thread(name: :melody) do
-wait 6
-melody(moves)
+  wait 6
+  melody(moves)
 end
